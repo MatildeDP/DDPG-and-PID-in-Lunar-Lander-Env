@@ -7,13 +7,13 @@ from utils import plotLearning
 env = gym.make('LunarLanderContinuous-v2')
 
 agent = Agent(alpha=0.000025, beta=0.00025, input_dims=[8], tau=0.001, env=env,
-              batch_size=64,  layer1_size=400, layer2_size=300, n_actions=4)
+              batch_size=64,  layer1_size=400, layer2_size=300, n_actions=2)
 
 #agent.load_models()
 np.random.seed(0)
 
 score_history = []
-for i in range(10):
+for i in range(50):
     obs = env.reset()
     done = False
     score = 0
@@ -23,8 +23,10 @@ for i in range(10):
         # choose actions
         act = agent.choose_action(obs)
 
-        if t % 10 == 0:
-            print(act)
+
+        if t is not 0:
+            if (10 % t) == 0:
+                print(act)
 
         # get reward from action, new state and check if state is terminal
         new_state, reward, done, info = env.step(act)
@@ -40,7 +42,7 @@ for i in range(10):
 
         # Store new state in obs
         obs = new_state
-        #env.render()
+        env.render()
         if done:
             print("Episode finished after {} timesteps".format(t))
         t += 1
