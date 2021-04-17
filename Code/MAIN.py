@@ -1,33 +1,54 @@
+
 from ddpg_torch_copy import Agent
 import gym
 import numpy as np
 from utils import plotLearning
 
 env = gym.make('LunarLanderContinuous-v2')
+agent = Agent(alpha=0.000025, beta=0.00025, input_dims=[8], tau=0.001, env=env,
+              batch_size=64,  layer1_size=400, layer2_size=300, n_actions=2)
 
-agent = Agent(alpha=0.00025, beta=0.00025, input_dims=[8], tau=0.001, env=env,
-              batch_size=64, layer1_size=400, layer2_size=300, n_actions=2)
-
+#agent.load_models()
 np.random.seed(0)
+
 score_history = []
 for i in range(10):
+    obs = env.reset()
     done = False
     score = 0
-    obs = env.reset()
+    t = 0
     while not done:
+
+        # choose actions
         act = agent.choose_action(obs)
+
+        # get reward from action, new state and check if state is terminal
         new_state, reward, done, info = env.step(act)
+
+        # Store new information
         agent.remember(obs, act, reward, new_state, int(done))
+
+        # Learn from minibatch
         agent.learn()
-        print(reward)
+
+        # Cummulative reward
         score += reward
+
+        # Store new state in obs
         obs = new_state
+        env.render()
+        if done:
+            print("Episode finished after {} timesteps".format(t))
+        t += 1
 
     score_history.append(score)
-    print('episode', i, 'score %.2f' % score)#,
-         # '100 game average %.2f' % np.mean(score_history[-100:]))
-    #if i % 25 == 0:
-    agent.save_model()
-    filename = 'lunar-lander.png'
-    plotLearning(score_history, filename, window=100)
-a = 292934823
+
+    if i % 25 == 0:
+        agent.save_models()
+
+    print('episode ', i, 'score %.2f' % score,
+          'trailing 100 games avg %.3f' % np.mean(score_history[-100:]))
+
+filename = 'LunarLander-alpha000025-beta00025-400-300.png'
+plotLearning(score_history, filename, window=100)
+a = 23234
