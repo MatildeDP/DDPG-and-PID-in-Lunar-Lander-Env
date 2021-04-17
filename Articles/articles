@@ -1,0 +1,12 @@
+DDPG:
+https://towardsdatascience.com/deep-deterministic-policy-gradients-explained-2d94655a9b7b
+https://www.youtube.com/watch?v=6Yd5WnYls_Y
+https://github.com/philtabor/Youtube-Code-Repository/tree/master/ReinforcementLearning/PolicyGradient/DDPG/pytorch/lunar-lander
+
+
+Initialise weight in deep neural network:
+https://towardsdatascience.com/weight-initialization-in-neural-networks-a-journey-from-the-basics-to-kaiming-954fb9b47c79
+
+
+Q learning and deep q learning
+https://towardsdatascience.com/deep-q-learning-tutorial-mindqn-2a4c855abffc
