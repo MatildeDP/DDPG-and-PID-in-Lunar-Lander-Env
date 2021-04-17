@@ -101,7 +101,7 @@ class ReplayBuffer(object):
 class CriticNetwork(nn.Module):
 
     def __init__(self, beta, input_dims, fc1_dims, fc2_dims, n_actions, name,
-                 chkpt_dir='tmp/ddpg'):
+                 chkpt_dir='Models'):
         super(CriticNetwork, self).__init__()
 
         # Define dims
@@ -143,7 +143,6 @@ class CriticNetwork(nn.Module):
         self.to(self.device)
 
     def forward(self, state, action):
-
         """
         input: state
         input: action
@@ -173,7 +172,7 @@ class CriticNetwork(nn.Module):
 
 class ActorNetwork(nn.Module):
     def __init__(self, alpha, input_dims, fc1_dims, fc2_dims, n_actions, name,
-                 chkpt_dir='tmp/ddpg'):
+                 chkpt_dir='Models'):
         super(ActorNetwork, self).__init__()
         self.input_dims = input_dims
         self.fc1_dims = fc1_dims
@@ -193,6 +192,9 @@ class ActorNetwork(nn.Module):
         self.bn2 = nn.LayerNorm(self.fc2_dims)
 
         f3 = 0.003
+
+        # Representation of policy.
+        # Actions, not probability because actions are deterministic
         self.mu = nn.Linear(self.fc2_dims, self.n_actions)
         T.nn.init.uniform_(self.mu.weight.data, -f3, f3)
         T.nn.init.uniform_(self.mu.bias.data, -f3, f3)
@@ -204,13 +206,17 @@ class ActorNetwork(nn.Module):
         self.to(self.device)
 
     def forward(self, state):
+        """
+        input: state
+        returns: action
+        """
         x = self.fc1(state)
         x = self.bn1(x)
         x = F.relu(x)
         x = self.fc2(x)
         x = self.bn2(x)
         x = F.relu(x)
-        x = T.tanh(self.mu(x))
+        x = T.tanh(self.mu(x))  # bound action to [0,1]
 
         return x
 
@@ -224,6 +230,18 @@ class ActorNetwork(nn.Module):
 
 
 class Agent(object):
+    """
+    input: alpha, beta: learning rate for actor and critic networks
+    input: tau
+    input: gamma: discount rate
+    input: n_actions: number of actions
+    input: max_size
+    input: layer1_size
+    input: layer2_size
+    input: batch_size
+
+    """
+
     def __init__(self, alpha, beta, input_dims, tau, env, gamma=0.99,
                  n_actions=2, max_size=1000000, layer1_size=400,
                  layer2_size=300, batch_size=64):
@@ -242,6 +260,7 @@ class Agent(object):
         self.target_actor = ActorNetwork(alpha, input_dims, layer1_size,
                                          layer2_size, n_actions=n_actions,
                                          name='TargetActor')
+
         self.target_critic = CriticNetwork(beta, input_dims, layer1_size,
                                            layer2_size, n_actions=n_actions,
                                            name='TargetCritic')
@@ -251,20 +270,35 @@ class Agent(object):
         self.update_network_parameters(tau=1)
 
     def choose_action(self, observation):
+
+        # Set actor in evaluation mode to avoid calculating statistics in batch norm layer
         self.actor.eval()
         observation = T.tensor(observation, dtype=T.float).to(self.actor.device)
+
+        # actions
         mu = self.actor.forward(observation).to(self.actor.device)
+
+        # add noise to actions
         mu_prime = mu + T.tensor(self.noise(),
                                  dtype=T.float).to(self.actor.device)
         self.actor.train()
         return mu_prime.cpu().detach().numpy()
 
     def remember(self, state, action, reward, new_state, done):
+        """
+        input: trajectory to be stored: state, action, reward, new_state
+        input: done: terminal information
+        Store transitions
+        """
         self.memory.store_transition(state, action, reward, new_state, done)
 
     def learn(self):
+
+        # Learn from buffer only if trajectory is sufficiently long
         if self.memory.mem_cntr < self.batch_size:
             return
+
+        # Retrieve batch for learning
         state, action, reward, new_state, done = \
             self.memory.sample_buffer(self.batch_size)
 
@@ -274,19 +308,28 @@ class Agent(object):
         action = T.tensor(action, dtype=T.float).to(self.critic.device)
         state = T.tensor(state, dtype=T.float).to(self.critic.device)
 
+        # Set evaluation mode
         self.target_actor.eval()
         self.target_critic.eval()
         self.critic.eval()
+
+        # Action and q value of new_state (from replay buffer)
+        # computed by target networks
         target_actions = self.target_actor.forward(new_state)
         critic_value_ = self.target_critic.forward(new_state, target_actions)
+
+        # q value of current state and action from replay buffer
         critic_value = self.critic.forward(state, action)
 
+        # Update q value with bellman eq. (yi in article)
+        # if state is terminal, done = 0 thus q will not be updated
         target = []
         for j in range(self.batch_size):
             target.append(reward[j] + self.gamma * critic_value_[j] * done[j])
         target = T.tensor(target).to(self.critic.device)
         target = target.view(self.batch_size, 1)
 
+        # Compute loss and uptimize critic
         self.critic.train()
         self.critic.optimizer.zero_grad()
         critic_loss = F.mse_loss(target, critic_value)
@@ -305,6 +348,9 @@ class Agent(object):
         self.update_network_parameters()
 
     def update_network_parameters(self, tau=None):
+        """
+        Update parameters with step size tau
+        """
         if tau is None:
             tau = self.tau
 
@@ -318,15 +364,20 @@ class Agent(object):
         target_critic_dict = dict(target_critic_params)
         target_actor_dict = dict(target_actor_params)
 
+        # Update critic parameters
         for name in critic_state_dict:
             critic_state_dict[name] = tau * critic_state_dict[name].clone() + \
                                       (1 - tau) * target_critic_dict[name].clone()
 
+        # Delayed copy
         self.target_critic.load_state_dict(critic_state_dict)
 
+        # Update actor parameters
         for name in actor_state_dict:
             actor_state_dict[name] = tau * actor_state_dict[name].clone() + \
                                      (1 - tau) * target_actor_dict[name].clone()
+
+        # Delayed copy
         self.target_actor.load_state_dict(actor_state_dict)
 
         """
