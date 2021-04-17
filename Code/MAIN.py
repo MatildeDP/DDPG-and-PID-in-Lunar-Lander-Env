@@ -1,18 +1,18 @@
 
-from ddpg_torch_copy import Agent
+from ddpg import Agent
 import gym
 import numpy as np
 from utils import plotLearning
 
 env = gym.make('LunarLanderContinuous-v2')
 agent = Agent(alpha=0.000025, beta=0.00025, input_dims=[8], tau=0.001, env=env,
-              batch_size=64,  layer1_size=400, layer2_size=300, n_actions=2)
+              batch_size=64,  layer1_size=400, layer2_size=300, n_actions=4)
 
 #agent.load_models()
 np.random.seed(0)
 
 score_history = []
-for i in range(10):
+for i in range(100):
     obs = env.reset()
     done = False
     score = 0
