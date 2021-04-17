@@ -1,0 +1,3 @@
+action space: continious and deterministic and we add noise via Ornstein-Uhlenbeck Process
+
+state space: continious
