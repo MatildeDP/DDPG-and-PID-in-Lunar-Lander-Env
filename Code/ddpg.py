@@ -216,7 +216,7 @@ class ActorNetwork(nn.Module):
         x = self.fc2(x)
         x = self.bn2(x)
         x = F.relu(x)
-        x = T.tanh(self.mu(x))  # bound action to [0,1]
+        x = T.tanh(self.mu(x))  # bound actions to [0,1]
 
         return x
 
@@ -239,7 +239,6 @@ class Agent(object):
     input: layer1_size
     input: layer2_size
     input: batch_size
-
     """
 
     def __init__(self, alpha, beta, input_dims, tau, env, gamma=0.99,
@@ -296,7 +295,7 @@ class Agent(object):
 
         # Learn from buffer only if trajectory is sufficiently long
         if self.memory.mem_cntr < self.batch_size:
-            return
+            return 0
 
         # Retrieve batch for learning
         state, action, reward, new_state, done = \
@@ -321,7 +320,7 @@ class Agent(object):
         # q value of current state and action from replay buffer
         critic_value = self.critic.forward(state, action)
 
-        # Update q value with bellman eq. (yi in article)
+        # Update critic with bellman eq. (yi in article)
         # if state is terminal, done = 0 thus q will not be updated
         target = []
         for j in range(self.batch_size):
@@ -329,7 +328,7 @@ class Agent(object):
         target = T.tensor(target).to(self.critic.device)
         target = target.view(self.batch_size, 1)
 
-        # Compute loss and uptimize critic
+        # Compute loss and optimize critic
         self.critic.train()
         self.critic.optimizer.zero_grad()
         critic_loss = F.mse_loss(target, critic_value)
@@ -337,6 +336,7 @@ class Agent(object):
         self.critic.optimizer.step()
 
         self.critic.eval()
+
         self.actor.optimizer.zero_grad()
         mu = self.actor.forward(state)
         self.actor.train()
@@ -346,6 +346,8 @@ class Agent(object):
         self.actor.optimizer.step()
 
         self.update_network_parameters()
+
+        return F.mse_loss(target, critic_value).cpu().detach().numpy().tolist()
 
     def update_network_parameters(self, tau=None):
         """
