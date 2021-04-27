@@ -12,7 +12,7 @@ def plotLearning(scores, filename, x=None, window=5):
     if x is None:
         x = [i for i in range(N)]
     plt.grid(color='black', linestyle='-', linewidth=1)
-    plt.title('Evolving Game Average', fontsize=20, fontstyle='oblique')
+    plt.title('Running Average', fontsize=20, fontstyle='oblique')
     plt.ylabel('Score', fontsize=12, fontstyle='italic')
     plt.xlabel('Game', fontsize=12, fontstyle='italic')
     plt.plot(x, running_avg,color="#FF6600")
