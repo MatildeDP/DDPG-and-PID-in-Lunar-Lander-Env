@@ -9,6 +9,8 @@ DDPG:
     Gennemgang af det paper ddpg kode kommer fra
     https://www.youtube.com/watch?v=jDll4JSI-xo
 
+    https://arxiv.org/pdf/1509.02971.pdf
+
 Initialise weight in deep neural network:
     https://towardsdatascience.com/weight-initialization-in-neural-networks-a-journey-from-the-basics-to-kaiming-954fb9b47c79
 
