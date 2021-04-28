@@ -113,24 +113,33 @@ def run(params, env, verbose=False):
 def main(episodes):
     # Setup environment
     env = gym.make('LunarLanderContinuous-v2')
-    env._max_episode_steps = 300
+    env._max_episode_steps = 1000
+    num_episodes = 1000
 
     # Seed RNGs
     np.random.seed(0)
     env.seed(0)
 
-    params = np.array([18, 13, -18, -18])
+    params = np.array([52.23302414, 34.55938593, -80.68722976, -38.04571655])
 
     # Get data for final run
     scores = []
-    for trial in range(300):
+    for trial in range(num_episodes):
         score, data = run(params, env, True)
         scores.append(score)
-        print("Score for episode" + str(trial) + ": " + str(score))
+        print("Score for episode " + str(trial) + ": " + str(score))
         print("Running average Score:", np.mean(scores))
     env.close()
 
+    plt.plot(list(range(1, num_episodes+1)), scores)
+    plt.grid()
+    plt.title('PID Control')
+    plt.ylabel('Score')
+    plt.xlabel('Episode')
+    plt.show()
+
     return scores
+
 
 
     #data.graph()
@@ -138,4 +147,4 @@ def main(episodes):
 
 if __name__ == '__main__':
     scores = main(50)
-    plotLearning(scores, 'PID.png')
+
