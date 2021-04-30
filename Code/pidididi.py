@@ -20,6 +20,7 @@ from irlc import train
 from irlc.ex04.pid import PID
 from irlc import Agent
 from irlc import savepdf
+from utils import SaveToPickle
 
 class ApolloLunarAgent(Agent):
     def __init__(self, env, dt, Kp_altitude=18, Kd_altitude=13, Kp_angle=-18, Kd_angle=-18): #Ki=0.0, Kd=0.0, target=0):
@@ -115,27 +116,18 @@ def lunar_performance():
     env = gym.make('LunarLanderContinuous-v2')
     env._max_episode_steps = 1000   # We don't want it to time out.
     env.seed(10)                    # Reproducibility
-    num_episodes = 100              # Set number of episodes
+    num_episodes = 1000             # Set number of episodes
     np.random.seed(10)              # Reproducibility
     agent = build_lunar_lander(env)
-    stats, scores, traj = train(env, agent, return_trajectory=True, num_episodes=num_episodes)
-    print(scores)
+    stats, scores_pid, traj = train(env, agent, return_trajectory=True, num_episodes=num_episodes)
+    print(scores_pid)
     env.close()
 
-    # Plot
-    plt.plot(list(range(1, num_episodes+1)), scores)
-    plt.grid()
-    plt.title('PID Control')
-    plt.ylabel('Score')
-    plt.xlabel('Episode')
-    plt.show()
-
-
-
+    SaveToPickle(scores_pid, 'Pid', 'Score_pid')
 
 if __name__ == "__main__":
     # Uncomment the line below if you want to see one episode example illustration
-    lunar_illustration()
-    #lunar_performance()
+    #lunar_illustration()
+    lunar_performance()
 
 

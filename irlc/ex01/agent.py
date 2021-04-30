@@ -131,7 +131,7 @@ def train(env, agent, experiment_name=None, num_episodes=1, verbose=True, reset=
     trajectories = []
 
     with tqdm(total=num_episodes, disable=not verbose, file=sys.stdout) as tq:
-        scores = []   # Collects score from each episode
+        scores = {}  # Collects score from each episode
         for i_episode in range(num_episodes):
             if reset or i_episode > 0:
                 s = env.reset()
@@ -167,7 +167,7 @@ def train(env, agent, experiment_name=None, num_episodes=1, verbose=True, reset=
                     break
                 s = sp
 
-            scores.append(score)  # Collects score from each episode
+            scores[i_episode] = score  # Collects score from each episode
 
             if return_trajectory:
                 trajectory = Trajectory(**{field: np.stack([np.asarray(x_) for x_ in getattr(trajectory, field)]) for field in fields}, env_info=trajectory.env_info)
