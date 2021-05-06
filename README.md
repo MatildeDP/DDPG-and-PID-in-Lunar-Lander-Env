@@ -12,7 +12,9 @@ The project is a part of the course 02465 Introduction to Reinforcement Learning
 * `pidididi.py`is the main functions for PID 
 * `gym` and `irlc` contains functions and classes nessesary to run PID
 
-The PID inplementation is inspired by 
+The PID inplementation is inspired by: https://gitlab.gbar.dtu.dk/02465material/02465students.git
 
-The DDPG inplementation is inspired by
+´gym´ and ´irlc´ is a copy of modules from https://gitlab.gbar.dtu.dk/02465material/02465students.git
+
+The DDPG inplementation is inspired by: https://github.com/philtabor/Youtube-Code-Repository/tree/master/ReinforcementLearning/PolicyGradient/DDPG/pytorch/lunar-lander
 
