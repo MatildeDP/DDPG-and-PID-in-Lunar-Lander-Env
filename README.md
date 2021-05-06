@@ -1,4 +1,5 @@
-# RLFinalProject
+# DDPG and PID in Lunar Lander Env
+
 
 A python implementation of DDPG and PID. Both algorithms are used to solve the control problem of gym's lunar lander environment with continious action space.
 
