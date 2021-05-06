@@ -8,7 +8,8 @@ The project is a part of the course 02465 Introduction to Reinforcement Learning
 # Project Structure
 * `DDPG.py` contains the classes nessesary for DDPG: `OUActionNoise`,`ReplayBuffer`, `CriticNetork`, `ActorNetwork` and `Agent`
 * `Train.py` contains the `train` function for DDPG.
-* `Plots.py` and `utils.py` contain plot and save functions
+* `Plots.py` contains all nessesary plot functions.
+* `utils.py` contains save methods.
 * `Grid_Search1` contains are the main script for DDPG. It runs a random grid search to tune alpha, beta, tau and gamma for DDPG
 * `PID.py`is the main functions for PID 
 * `gym` and `irlc` contains functions and classes nessesary to run PID
