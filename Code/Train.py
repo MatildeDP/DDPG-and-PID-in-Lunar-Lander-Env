@@ -2,7 +2,7 @@
 def train(env, agent, obs ,t = 0, done = False, score = 0):
     Loss = []
     while not done:
-        # choose actions
+        # Choose actions
         act = agent.choose_action(obs)
 
         #if t is not 0:
