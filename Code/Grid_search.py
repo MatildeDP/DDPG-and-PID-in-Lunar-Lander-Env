@@ -91,8 +91,6 @@ if __name__ == "__main__":
         filename2 = 'Plots\Loss\Evolving_Loss{}.png'.format(j)
         plotLoss(LossHist,filename2)
 
-        a =  2332
-
         #Plot scores for each game in one CV
 
         filename3 = 'Plots\Score\Game_Scores{}.png'.format(j)
