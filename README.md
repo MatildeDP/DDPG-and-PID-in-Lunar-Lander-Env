@@ -10,7 +10,7 @@ The project is a part of the course 02465 Introduction to Reinforcement Learning
 * `Train.py` contains the `train` function for DDPG.
 * `Plots.py` contains all nessesary plot functions.
 * `utils.py` contains save methods.
-* `Grid_Search1` contains are the main script for DDPG. It runs a random grid search to tune alpha, beta, tau and gamma for DDPG
+* `Grid_Search` contains are the main script for DDPG. It runs a random grid search to tune alpha, beta, tau and gamma for DDPG
 * `PID.py`is the main functions for PID 
 * `gym` and `irlc` contains functions and classes nessesary to run PID
 
